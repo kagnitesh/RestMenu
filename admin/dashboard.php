@@ -153,6 +153,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         button { padding:10px 12px; background:#111; color:#fff; border:none; border-radius:6px; font-size:15px; cursor:pointer; }
         .meta { margin-top:8px; color:#555; font-size:13px; }
         .logout { text-decoration:none; color:#111; font-weight:600; }
+        .footer { margin-top: 16px; text-align:center; font-size:12px; color:#666; }
+        .footer a { color: inherit; text-decoration: underline; }
         /* Modal */
         .modal-overlay { position: fixed; left:0; top:0; right:0; bottom:0; background: rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; padding:16px; }
         .modal-overlay.open { display:flex; }
@@ -204,6 +206,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
         </div>
+        <div class="footer">Design and developed by <a href="https://zikasha.com" target="_blank" rel="noopener">Zikasha Consultancy LLP</a></div>
     </div>
 </body>
     <!-- Modal: Change Credentials -->
