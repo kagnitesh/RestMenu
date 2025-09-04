@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         h1 { margin:0 0 16px 0; font-size:22px; }
         .field { margin-bottom:12px; }
         label { display:block; font-size:14px; margin-bottom:6px; color:#333; }
-        input[type=text], input[type=password] { width:100%; padding:10px 12px; border:1px solid #ccc; border-radius:6px; font-size:14px; }
+        input[type=text], input[type=password] { width:100%; padding:10px 12px; border:1px solid #ccc; border-radius:6px; font-size:14px; box-sizing: border-box; }
         button { width:100%; padding:10px 12px; background:#111; color:#fff; border:none; border-radius:6px; font-size:15px; cursor:pointer; }
         .error { background:#ffe5e5; color:#b30000; padding:10px 12px; border-radius:6px; margin-bottom:12px; font-size:14px; }
         .hint { font-size:12px; color:#666; margin-top:10px; }
