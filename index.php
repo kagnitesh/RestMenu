@@ -26,6 +26,8 @@ $menuUrl = '/uploads/menu.jpg?v=' . $lastUpdated;
         .menu { max-width: 900px; width: 100%; }
         .menu img { width: 100%; height: auto; display: block; box-shadow: 0 6px 24px rgba(0,0,0,0.12); border-radius: 8px; background: #fff; }
         .updated { margin-top: 12px; text-align: center; font-size: 14px; color: #555; }
+        .footer { margin-top: 24px; text-align: center; font-size: 13px; color:#666; }
+        .footer a { color: inherit; text-decoration: underline; }
     </style>
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
@@ -43,6 +45,7 @@ $menuUrl = '/uploads/menu.jpg?v=' . $lastUpdated;
             <?php endif; ?>
             <div class="updated">Last updated: <?php echo date('Y-m-d H:i:s', $lastUpdated); ?></div>
         </div>
+        <div class="footer">Design and developed by <a href="https://zikasha.com" target="_blank" rel="noopener">Zikasha Consultancy LLP</a></div>
     </div>
 </body>
 </html>

@@ -73,6 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         button { width:100%; padding:10px 12px; background:#111; color:#fff; border:none; border-radius:6px; font-size:15px; cursor:pointer; }
         .error { background:#ffe5e5; color:#b30000; padding:10px 12px; border-radius:6px; margin-bottom:12px; font-size:14px; }
         .hint { font-size:12px; color:#666; margin-top:10px; }
+        .footer { margin-top: 16px; text-align:center; font-size:12px; color:#666; }
+        .footer a { color: inherit; text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -95,6 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button type="submit">Log In</button>
                 <!-- <div class="hint">Default: admin / changeme123</div> -->
             </form>
+            <div class="footer">Design and developed by <a href="https://zikasha.com" target="_blank" rel="noopener">Zikasha Consultancy LLP</a></div>
         </div>
     </div>
 </body>

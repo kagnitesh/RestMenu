@@ -153,6 +153,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         button { padding:10px 12px; background:#111; color:#fff; border:none; border-radius:6px; font-size:15px; cursor:pointer; }
         .meta { margin-top:8px; color:#555; font-size:13px; }
         .logout { text-decoration:none; color:#111; font-weight:600; }
+        /* Modal */
+        .modal-overlay { position: fixed; left:0; top:0; right:0; bottom:0; background: rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; padding:16px; }
+        .modal-overlay.open { display:flex; }
+        .modal { position:relative; background:#fff; border-radius:10px; box-shadow:0 6px 24px rgba(0,0,0,0.18); padding:20px; width:100%; max-width:460px; }
+        .modal h3 { margin:0 0 12px 0; font-size:18px; }
+        .modal .close { position:absolute; right:12px; top:8px; background:transparent; border:none; font-size:22px; cursor:pointer; line-height:1; }
+        .modal-actions { display:flex; gap:8px; margin-top:12px; justify-content:flex-end; }
     </style>
 </head>
 <body>
@@ -186,36 +193,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <label for="menu_image">Choose JPG or PNG</label>
                         <input id="menu_image" name="menu_image" type="file" accept="image/jpeg,image/png" required>
                         <button type="submit">Upload & Replace</button>
-                        <div class="meta">The file will be saved as /uploads/menu.jpg</div>
+                        <!-- <div class="meta">The file will be saved as /uploads/menu.jpg</div> -->
                     </form>
                 </div>
             </div>
             <div class="col">
                 <div class="card">
                     <h2 style="margin-top:0; font-size:18px;">Change Credentials</h2>
-                    <form method="post" action="/admin/dashboard.php" autocomplete="off">
-                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
-                        <input type="hidden" name="action" value="change_credentials">
-                        <label for="current_password">Current Password</label>
-                        <input id="current_password" name="current_password" type="password" required>
-
-                        <label for="new_username" style="margin-top:10px;">New Username</label>
-                        <input id="new_username" name="new_username" type="text" required>
-
-                        <label for="new_password" style="margin-top:10px;">New Password</label>
-                        <input id="new_password" name="new_password" type="password" required>
-
-                        <label for="confirm_password" style="margin-top:10px;">Confirm New Password</label>
-                        <input id="confirm_password" name="confirm_password" type="password" required>
-
-                        <button type="submit" style="margin-top:12px;">Update Credentials</button>
-                        <div class="meta">This updates values in config.php</div>
-                    </form>
+                    <button id="openCreds" type="button">Open Change Credentials</button>
                 </div>
             </div>
         </div>
     </div>
 </body>
+    <!-- Modal: Change Credentials -->
+    <div id="credsModal" class="modal-overlay" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="credsTitle">
+            <button class="close" id="closeCreds" aria-label="Close">×</button>
+            <h3 id="credsTitle">Change Credentials</h3>
+            <form method="post" action="/admin/dashboard.php" autocomplete="off">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
+                <input type="hidden" name="action" value="change_credentials">
+
+                <label for="current_password_modal">Current Password</label>
+                <input id="current_password_modal" name="current_password" type="password" required>
+
+                <label for="new_username_modal" style="margin-top:10px;">New Username</label>
+                <input id="new_username_modal" name="new_username" type="text" required>
+
+                <label for="new_password_modal" style="margin-top:10px;">New Password</label>
+                <input id="new_password_modal" name="new_password" type="password" required>
+
+                <label for="confirm_password_modal" style="margin-top:10px;">Confirm New Password</label>
+                <input id="confirm_password_modal" name="confirm_password" type="password" required>
+
+                <div class="modal-actions">
+                    <button type="button" id="cancelCreds">Cancel</button>
+                    <button type="submit">Update Credentials</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
+(function(){
+    var openBtn = document.getElementById('openCreds');
+    var modal = document.getElementById('credsModal');
+    var closeBtn = document.getElementById('closeCreds');
+    var cancelBtn = document.getElementById('cancelCreds');
+    if (!openBtn || !modal) return;
+    function open(){ modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); }
+    function close(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
+    openBtn.addEventListener('click', open);
+    if (closeBtn) closeBtn.addEventListener('click', close);
+    if (cancelBtn) cancelBtn.addEventListener('click', close);
+    modal.addEventListener('click', function(e){ if (e.target === modal) close(); });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
+})();
+</script>
 </html>
 
 
