@@ -38,54 +38,90 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Handle upload
+// Handle POST actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postedToken = isset($_POST['csrf_token']) ? (string)$_POST['csrf_token'] : '';
     if (!hash_equals($_SESSION['csrf_token'], $postedToken)) {
         $error = 'Invalid request. Please refresh and try again.';
-    } else if (!isset($_FILES['menu_image']) || $_FILES['menu_image']['error'] !== UPLOAD_ERR_OK) {
-        $error = 'Upload failed. Please choose a valid image file.';
     } else {
-        $tmpPath = $_FILES['menu_image']['tmp_name'];
-        $fileInfo = getimagesize($tmpPath);
-        if ($fileInfo === false) {
-            $error = 'Uploaded file is not a valid image.';
-        } else {
-            $mime = $fileInfo['mime'];
-            if ($mime !== 'image/jpeg' && $mime !== 'image/png') {
-                $error = 'Only JPG or PNG files are allowed.';
+        $action = isset($_POST['action']) ? (string)$_POST['action'] : '';
+        if ($action === 'upload') {
+            if (!isset($_FILES['menu_image']) || $_FILES['menu_image']['error'] !== UPLOAD_ERR_OK) {
+                $error = 'Upload failed. Please choose a valid image file.';
             } else {
-                // Normalize to JPG output to ensure consistent public filename
-                if ($mime === 'image/png') {
-                    $image = imagecreatefrompng($tmpPath);
-                    if ($image === false) {
-                        $error = 'Could not process PNG image.';
+                $tmpPath = $_FILES['menu_image']['tmp_name'];
+                $fileInfo = getimagesize($tmpPath);
+                if ($fileInfo === false) {
+                    $error = 'Uploaded file is not a valid image.';
+                } else {
+                    $mime = $fileInfo['mime'];
+                    if ($mime !== 'image/jpeg' && $mime !== 'image/png') {
+                        $error = 'Only JPG or PNG files are allowed.';
                     } else {
-                        imageinterlace($image, true);
-                        if (!imagejpeg($image, $menuFile, 90)) {
-                            $error = 'Failed to save image.';
+                        if ($mime === 'image/png') {
+                            $image = imagecreatefrompng($tmpPath);
+                            if ($image === false) {
+                                $error = 'Could not process PNG image.';
+                            } else {
+                                imageinterlace($image, true);
+                                if (!imagejpeg($image, $menuFile, 90)) {
+                                    $error = 'Failed to save image.';
+                                }
+                                imagedestroy($image);
+                            }
+                        } else if ($mime === 'image/jpeg') {
+                            $image = imagecreatefromjpeg($tmpPath);
+                            if ($image === false) {
+                                $error = 'Could not process JPEG image.';
+                            } else {
+                                imageinterlace($image, true);
+                                if (!imagejpeg($image, $menuFile, 90)) {
+                                    $error = 'Failed to save image.';
+                                }
+                                imagedestroy($image);
+                            }
                         }
-                        imagedestroy($image);
-                    }
-                } else if ($mime === 'image/jpeg') {
-                    $image = imagecreatefromjpeg($tmpPath);
-                    if ($image === false) {
-                        $error = 'Could not process JPEG image.';
-                    } else {
-                        imageinterlace($image, true);
-                        if (!imagejpeg($image, $menuFile, 90)) {
-                            $error = 'Failed to save image.';
+
+                        if ($error === '') {
+                            @chmod($menuFile, 0644);
+                            clearstatcache(true, $menuFile);
+                            $lastUpdated = filemtime($menuFile);
+                            $menuUrl = '/uploads/menu.jpg?v=' . $lastUpdated;
+                            $message = 'Menu image updated successfully.';
                         }
-                        imagedestroy($image);
                     }
                 }
+            }
+        } else if ($action === 'change_credentials') {
+            $currentPassword = isset($_POST['current_password']) ? (string)$_POST['current_password'] : '';
+            $newUsername = isset($_POST['new_username']) ? trim((string)$_POST['new_username']) : '';
+            $newPassword = isset($_POST['new_password']) ? (string)$_POST['new_password'] : '';
+            $confirmPassword = isset($_POST['confirm_password']) ? (string)$_POST['confirm_password'] : '';
 
-                if ($error === '') {
-                    @chmod($menuFile, 0644);
-                    clearstatcache(true, $menuFile);
-                    $lastUpdated = filemtime($menuFile);
-                    $menuUrl = '/uploads/menu.jpg?v=' . $lastUpdated;
-                    $message = 'Menu image updated successfully.';
+            // Load current credentials
+            $configPath = dirname(__DIR__) . '/config.php';
+            $config = require $configPath;
+            $currentUsername = isset($config['ADMIN_USERNAME']) ? (string)$config['ADMIN_USERNAME'] : '';
+            $currentPlain = isset($config['ADMIN_PASSWORD']) ? (string)$config['ADMIN_PASSWORD'] : '';
+
+            if (!hash_equals($currentPlain, $currentPassword)) {
+                $error = 'Current password is incorrect.';
+            } else if ($newUsername === '' || $newPassword === '') {
+                $error = 'Username and new password are required.';
+            } else if (!hash_equals($newPassword, $confirmPassword)) {
+                $error = 'New password and confirmation do not match.';
+            } else {
+                // Write new config atomically
+                $newConfig = "<?php\nreturn [\n    'ADMIN_USERNAME' => '" . str_replace("'", "\\'", $newUsername) . "',\n    'ADMIN_PASSWORD' => '" . str_replace("'", "\\'", $newPassword) . "',\n];\n";
+                $tmpFile = $configPath . '.tmp';
+                if (file_put_contents($tmpFile, $newConfig, LOCK_EX) === false) {
+                    $error = 'Failed to write configuration.';
+                } else if (!rename($tmpFile, $configPath)) {
+                    @unlink($tmpFile);
+                    $error = 'Failed to update configuration.';
+                } else {
+                    clearstatcache(true, $configPath);
+                    $message = 'Credentials updated. Please use the new login next time.';
                 }
             }
         }
@@ -146,10 +182,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php if ($error): ?><div class="msg error"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
                     <form method="post" enctype="multipart/form-data" action="/admin/dashboard.php" autocomplete="off">
                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
+                        <input type="hidden" name="action" value="upload">
                         <label for="menu_image">Choose JPG or PNG</label>
                         <input id="menu_image" name="menu_image" type="file" accept="image/jpeg,image/png" required>
                         <button type="submit">Upload & Replace</button>
                         <div class="meta">The file will be saved as /uploads/menu.jpg</div>
+                    </form>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <h2 style="margin-top:0; font-size:18px;">Change Credentials</h2>
+                    <form method="post" action="/admin/dashboard.php" autocomplete="off">
+                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
+                        <input type="hidden" name="action" value="change_credentials">
+                        <label for="current_password">Current Password</label>
+                        <input id="current_password" name="current_password" type="password" required>
+
+                        <label for="new_username" style="margin-top:10px;">New Username</label>
+                        <input id="new_username" name="new_username" type="text" required>
+
+                        <label for="new_password" style="margin-top:10px;">New Password</label>
+                        <input id="new_password" name="new_password" type="password" required>
+
+                        <label for="confirm_password" style="margin-top:10px;">Confirm New Password</label>
+                        <input id="confirm_password" name="confirm_password" type="password" required>
+
+                        <button type="submit" style="margin-top:12px;">Update Credentials</button>
+                        <div class="meta">This updates values in config.php</div>
                     </form>
                 </div>
             </div>

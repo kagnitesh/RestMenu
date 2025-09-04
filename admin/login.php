@@ -25,9 +25,10 @@ if (!empty($_SESSION['is_authenticated']) && $_SESSION['is_authenticated'] === t
     exit;
 }
 
-// Hardcoded credentials (change as needed)
-$USERNAME = 'admin';
-$PASSWORD = 'changeme123';
+// Load credentials from config
+$config = require dirname(__DIR__) . '/config.php';
+$USERNAME = isset($config['ADMIN_USERNAME']) ? (string)$config['ADMIN_USERNAME'] : 'admin';
+$PASSWORD = isset($config['ADMIN_PASSWORD']) ? (string)$config['ADMIN_PASSWORD'] : 'changeme123';
 
 $error = '';
 
