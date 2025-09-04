@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input id="password" name="password" type="password" required>
                 </div>
                 <button type="submit">Log In</button>
-                <div class="hint">Default: admin / changeme123</div>
+                <!-- <div class="hint">Default: admin / changeme123</div> -->
             </form>
         </div>
     </div>
