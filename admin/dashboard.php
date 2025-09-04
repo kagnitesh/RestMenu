@@ -27,6 +27,7 @@ if (empty($_SESSION['is_authenticated'])) {
 
 $uploadsDir = dirname(__DIR__) . '/uploads';
 $menuFile = $uploadsDir . '/menu.jpg';
+$mealMetaFile = $uploadsDir . '/meal.txt';
 $lastUpdated = file_exists($menuFile) ? filemtime($menuFile) : 0;
 $menuUrl = '/uploads/menu.jpg?v=' . ($lastUpdated ?: time());
 
@@ -85,6 +86,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if ($error === '') {
                             @chmod($menuFile, 0644);
                             clearstatcache(true, $menuFile);
+                            // Save meal type metadata
+                            $mealType = isset($_POST['meal_type']) ? trim((string)$_POST['meal_type']) : '';
+                            if ($mealType !== '') {
+                                file_put_contents($mealMetaFile, $mealType, LOCK_EX);
+                                @chmod($mealMetaFile, 0644);
+                            }
                             $lastUpdated = filemtime($menuFile);
                             $menuUrl = '/uploads/menu.jpg?v=' . $lastUpdated;
                             $message = 'Menu image updated successfully.';
@@ -194,6 +201,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <input type="hidden" name="action" value="upload">
                         <label for="menu_image">Choose JPG or PNG</label>
                         <input id="menu_image" name="menu_image" type="file" accept="image/jpeg,image/png" required>
+                        <div style="margin:8px 0 4px 0; font-size:14px;">Meal Type</div>
+                        <label style="display:inline-flex; align-items:center; gap:6px; margin-right:12px;">
+                            <input type="radio" name="meal_type" value="Lunch" required> Lunch
+                        </label>
+                        <label style="display:inline-flex; align-items:center; gap:6px;">
+                            <input type="radio" name="meal_type" value="Dinner" required> Dinner
+                        </label>
                         <button type="submit">Upload & Replace</button>
                         <!-- <div class="meta">The file will be saved as /uploads/menu.jpg</div> -->
                     </form>
@@ -202,7 +216,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="col">
                 <div class="card">
                     <h2 style="margin-top:0; font-size:18px;">Change Credentials</h2>
-                    <button id="openCreds" type="button">Open Change Credentials</button>
+                    <button id="openCreds" type="button">Change Credentials</button>
                 </div>
             </div>
         </div>
