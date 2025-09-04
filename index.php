@@ -28,7 +28,7 @@ $menuUrl = '/uploads/menu.jpg?v=' . $lastUpdated;
         .container { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; box-sizing: border-box; }
         .menu { max-width: 900px; width: 100%; position: relative; }
         .menu img { width: 100%; height: auto; display: block; box-shadow: 0 6px 24px rgba(0,0,0,0.12); border-radius: 8px; background: #fff; }
-        .badge { position: absolute; left: 50%; top: 8px; transform: translateX(-50%); background: rgba(0,0,0,0.7); color:#fff; padding: 6px 12px; border-radius: 20px; font-size: 14px; letter-spacing: 0.3px; }
+        .badge { position: absolute; left: 50%; top: 8px; transform: translateX(-50%); background: rgba(0,0,0,0.7); color:#fff; padding: 6px 12px; border-radius: 20px; font-size: 14px; letter-spacing: 0.3px; z-index: 2; pointer-events: none; }
         .updated { margin-top: 12px; text-align: center; font-size: 14px; color: #555; }
         .footer { margin-top: 24px; text-align: center; font-size: 13px; color:#666; }
         .footer a { color: inherit; text-decoration: underline; }
